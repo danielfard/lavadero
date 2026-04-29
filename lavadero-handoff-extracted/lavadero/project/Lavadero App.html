@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lavadero — Sistema de Gestión</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body,#root{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);}
+
+/* ─── Theme: Azul Marino (default) ─── */
+:root{
+  --sidebar-bg:#0c1624;
+  --sidebar-text:#94a3b8;
+  --sidebar-heading:#475569;
+  --sidebar-active-bg:rgba(14,165,233,0.15);
+  --sidebar-active-text:#38bdf8;
+  --sidebar-hover-bg:rgba(255,255,255,0.05);
+  --sidebar-border:rgba(255,255,255,0.06);
+  --bg:#f1f5f9;
+  --surface:#ffffff;
+  --surface2:#f8fafc;
+  --border:#e2e8f0;
+  --text:#0f172a;
+  --text2:#64748b;
+  --primary:#0284c7;
+  --primary-hover:#0369a1;
+  --primary-text:#ffffff;
+  --accent:#0ea5e9;
+  --success:#16a34a;
+  --warning:#d97706;
+  --danger:#dc2626;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+}
+:root[data-theme="esmeralda"]{
+  --sidebar-bg:#052e16;
+  --sidebar-text:#86efac;
+  --sidebar-heading:#166534;
+  --sidebar-active-bg:rgba(34,197,94,0.2);
+  --sidebar-active-text:#4ade80;
+  --sidebar-hover-bg:rgba(255,255,255,0.07);
+  --sidebar-border:rgba(255,255,255,0.06);
+  --bg:#f0fdf4;
+  --surface:#ffffff;
+  --surface2:#f7fef9;
+  --border:#dcfce7;
+  --text:#052e16;
+  --text2:#166534;
+  --primary:#16a34a;
+  --primary-hover:#15803d;
+  --primary-text:#ffffff;
+  --accent:#22c55e;
+}
+:root[data-theme="graphite"]{
+  --sidebar-bg:#16161d;
+  --sidebar-text:#94a3b8;
+  --sidebar-heading:#334155;
+  --sidebar-active-bg:rgba(167,139,250,0.15);
+  --sidebar-active-text:#c4b5fd;
+  --sidebar-hover-bg:rgba(255,255,255,0.04);
+  --sidebar-border:rgba(255,255,255,0.05);
+  --bg:#0f172a;
+  --surface:#1e293b;
+  --surface2:#162032;
+  --border:#334155;
+  --text:#f1f5f9;
+  --text2:#94a3b8;
+  --primary:#7c3aed;
+  --primary-hover:#6d28d9;
+  --primary-text:#ffffff;
+  --accent:#a78bfa;
+  --success:#22c55e;
+  --warning:#f59e0b;
+  --danger:#f87171;
+  --shadow:0 1px 3px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.3);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,.4),0 4px 6px -4px rgba(0,0,0,.3);
+}
+
+/* ─── Layout ─── */
+.app{display:flex;height:100vh;}
+.sidebar{width:260px;min-width:260px;background:var(--sidebar-bg);display:flex;flex-direction:column;border-right:1px solid var(--sidebar-border);overflow:hidden;}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--sidebar-border);}
+.sidebar-logo h1{font-size:18px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+.sidebar-logo p{font-size:12px;color:var(--sidebar-text);margin-top:2px;}
+.sidebar-nav{flex:1;overflow-y:auto;padding:16px 12px;}
+.sidebar-section-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--sidebar-heading);padding:8px 8px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;color:var(--sidebar-text);font-size:13.5px;font-weight:500;transition:background .15s,color .15s;user-select:none;}
+.nav-item:hover{background:var(--sidebar-hover-bg);color:#fff;}
+.nav-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active-text);}
+.nav-item svg{flex-shrink:0;opacity:.85;}
+.nav-item.active svg{opacity:1;}
+.sidebar-footer{padding:16px;border-top:1px solid var(--sidebar-border);}
+.user-row{display:flex;align-items:center;gap:10px;}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.user-info h3{font-size:13px;font-weight:600;color:#fff;}
+.user-info p{font-size:11px;color:var(--sidebar-text);}
+
+/* ─── Main ─── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-left{display:flex;flex-direction:column;}
+.topbar-breadcrumb{font-size:11px;color:var(--text2);}
+.topbar-title{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.content{flex:1;overflow-y:auto;padding:24px 28px;}
+
+/* ─── Cards ─── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+.stat-card-label{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:6px;}
+.stat-card-value{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.5px;line-height:1;}
+.stat-card-sub{font-size:11px;color:var(--text2);margin-top:6px;}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+
+/* ─── Table ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+.card-header{padding:18px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.card-title{font-size:14px;font-weight:700;color:var(--text);}
+.card-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;background:var(--surface2);border-bottom:1px solid var(--border);}
+thead th:first-child{border-radius:0;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--surface2);}
+tbody td{padding:13px 16px;color:var(--text);vertical-align:middle;}
+tbody td.muted{color:var(--text2);}
+
+/* ─── Badges ─── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+.badge-green{background:rgba(22,163,74,.1);color:#15803d;}
+.badge-blue{background:rgba(14,165,233,.12);color:#0369a1;}
+.badge-yellow{background:rgba(217,119,6,.12);color:#b45309;}
+.badge-gray{background:rgba(100,116,139,.1);color:#475569;}
+.badge-red{background:rgba(220,38,38,.1);color:#b91c1c;}
+:root[data-theme="graphite"] .badge-green{background:rgba(34,197,94,.15);color:#4ade80;}
+:root[data-theme="graphite"] .badge-blue{background:rgba(96,165,250,.15);color:#93c5fd;}
+:root[data-theme="graphite"] .badge-yellow{background:rgba(251,191,36,.15);color:#fcd34d;}
+:root[data-theme="graphite"] .badge-red{background:rgba(248,113,113,.15);color:#fca5a5;}
+
+/* ─── Buttons ─── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--primary);color:var(--primary-text);}
+.btn-primary:hover{background:var(--primary-hover);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);}
+.btn-danger{background:rgba(220,38,38,.1);color:var(--danger);border:1px solid rgba(220,38,38,.2);}
+.btn-sm{padding:5px 12px;font-size:12px;}
+
+/* ─── Search / Input ─── */
+.search-row{display:flex;gap:10px;align-items:center;}
+.search-input{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;flex:1;max-width:320px;}
+.search-input input{border:none;background:transparent;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;}
+.search-input input::placeholder{color:var(--text2);}
+
+/* ─── Tabs ─── */
+.tabs{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:4px;}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
+.tab.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:var(--shadow);}
+
+/* ─── Modal ─── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;}
+.modal-header{padding:20px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);}
+.modal-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.modal-close{background:transparent;border:none;cursor:pointer;color:var(--text2);padding:4px;border-radius:6px;display:flex;}
+.modal-close:hover{background:var(--surface2);}
+
+/* ─── Form fields ─── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-grid .span-2{grid-column:span 2;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;font-weight:600;color:var(--text2);}
+.field input,.field select,.field textarea{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-size:13.5px;font-family:'DM Sans',sans-serif;
+  color:var(--text);outline:none;transition:border .15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;min-height:72px;}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+
+/* ─── Misc ─── */
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.dot-green{background:#22c55e;}
+.dot-blue{background:#38bdf8;}
+.dot-yellow{background:#f59e0b;}
+.empty-state{padding:48px 20px;text-align:center;color:var(--text2);font-size:14px;}
+.section-gap{margin-bottom:20px;}
+.inline-edit{background:transparent;border:none;border-bottom:1px dashed var(--border);font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--text);padding:2px 4px;outline:none;width:100%;}
+.inline-edit:focus{border-bottom-color:var(--accent);}
+.progress-bar-wrap{width:100%;background:var(--border);border-radius:20px;height:6px;overflow:hidden;}
+.progress-bar{height:100%;border-radius:20px;background:var(--accent);}
+.chip{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--border);color:var(--text2);background:var(--surface2);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ─── Mock Data ────────────────────────────────────────────────────────────────
+const EMPLOYEES = [
+  { id:'e1', name:'Carlos Mendoza', commission:30, phone:'300-555-0101', active:true },
+  { id:'e2', name:'Pedro García',   commission:30, phone:'310-555-0202', active:true },
+  { id:'e3', name:'Luis Torres',    commission:30, phone:'320-555-0303', active:true },
+  { id:'e4', name:'Mario Ruiz',     commission:30, phone:'305-555-0404', active:false },
+];
+const SERVICE_TYPES = [
+  { id:'s1', name:'Lavado Básico',     sedan:15000, suv:22000, moto:8000,  camioneta:25000 },
+  { id:'s2', name:'Polichado',         sedan:50000, suv:65000, moto:30000, camioneta:70000 },
+  { id:'s3', name:'Lavado de Cojinería',sedan:35000,suv:45000, moto:0,     camioneta:50000 },
+  { id:'s4', name:'Lavado + Polichado',sedan:60000, suv:80000, moto:35000, camioneta:90000 },
+];
+const CLIENTS = [
+  { id:'c1', name:'Juan Pérez',     doc:'12345678', phone:'310-111-2233', vehicles:[{plate:'ABC-123',type:'sedan',brand:'Toyota Corolla'}] },
+  { id:'c2', name:'María García',   doc:'98765432', phone:'315-222-3344', vehicles:[{plate:'XYZ-456',type:'suv',brand:'Hyundai Tucson'}] },
+  { id:'c3', name:'Roberto Silva',  doc:'45678912', phone:'320-333-4455', vehicles:[{plate:'DEF-789',type:'camioneta',brand:'Ford F-150'},{plate:'GHI-321',type:'sedan',brand:'Mazda 3'}] },
+  { id:'c4', name:'Ana López',      doc:'32165498', phone:'305-444-5566', vehicles:[{plate:'JKL-654',type:'moto',brand:'Yamaha FZ'}] },
+  { id:'c5', name:'Carlos Reyes',   doc:'65498732', phone:'311-555-6677', vehicles:[{plate:'MNO-987',type:'suv',brand:'Kia Sportage'}] },
+];
+const INIT_WASHINGS = [
+  { id:'w1', employeeId:'e1', clientId:'c1', plate:'ABC-123', vehicleType:'sedan', service:'Lavado Básico',      price:15000, status:'completado', time:'07:45' },
+  { id:'w2', employeeId:'e2', clientId:'c2', plate:'XYZ-456', vehicleType:'suv',   service:'Polichado',         price:65000, status:'en_proceso', time:'09:15' },
+  { id:'w3', employeeId:'e1', clientId:'c3', plate:'DEF-789', vehicleType:'camioneta',service:'Lavado de Cojinería',price:50000,status:'pendiente', time:'10:00' },
+  { id:'w4', employeeId:'e3', clientId:'c4', plate:'JKL-654', vehicleType:'moto',  service:'Lavado Básico',     price:8000,  status:'completado', time:'07:30' },
+  { id:'w5', employeeId:'e2', clientId:'c1', plate:'ABC-123', vehicleType:'sedan', service:'Lavado + Polichado', price:60000, status:'completado', time:'11:30' },
+  { id:'w6', employeeId:'e3', clientId:'c5', plate:'MNO-987', vehicleType:'suv',   service:'Lavado Básico',     price:22000, status:'completado', time:'08:00' },
+];
+const INIT_INVENTORY = [
+  { id:'i1', name:'Shampoo para Auto',    category:'limpieza',  stock:12, price:28000, unit:'unidad',   minStock:5 },
+  { id:'i2', name:'Cera Líquida Premium', category:'limpieza',  stock:4,  price:45000, unit:'litro',    minStock:5 },
+  { id:'i3', name:'Microfibra x10',       category:'limpieza',  stock:8,  price:35000, unit:'paquete',  minStock:3 },
+  { id:'i4', name:'Batería 60Ah',         category:'bateria',   stock:3,  price:450000,unit:'unidad',   minStock:2 },
+  { id:'i5', name:'Batería 90Ah',         category:'bateria',   stock:1,  price:650000,unit:'unidad',   minStock:2 },
+  { id:'i6', name:'Perfume Lavanda',      category:'perfumeria',stock:20, price:18000, unit:'unidad',   minStock:5 },
+  { id:'i7', name:'Perfume Nuevo Car',    category:'perfumeria',stock:15, price:22000, unit:'unidad',   minStock:5 },
+  { id:'i8', name:'Aromatizante Gel',     category:'perfumeria',stock:3,  price:12000, unit:'unidad',   minStock:5 },
+];
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+const fmt = (n) => '$' + n.toLocaleString('es-CO');
+const getEmployee = (id, employees) => employees.find(e => e.id === id);
+const getClient = (id) => CLIENTS.find(c => c.id === id);
+
+const STATUS_MAP = {
+  completado: { label:'Completado', cls:'badge-green' },
+  en_proceso: { label:'En Proceso', cls:'badge-blue' },
+  pendiente:  { label:'Pendiente',  cls:'badge-yellow' },
+};
+const CAT_MAP = {
+  limpieza:   { label:'Limpieza',   cls:'badge-blue' },
+  bateria:    { label:'Baterías',   cls:'badge-yellow' },
+  perfumeria: { label:'Perfumería', cls:'badge-green' },
+};
+const VEHICLE_TYPES = ['sedan','suv','moto','camioneta'];
+const VEHICLE_LABELS = { sedan:'Sedán', suv:'SUV', moto:'Moto', camioneta:'Camioneta' };
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+const Ic = ({ d, size=16, color='currentColor', ...rest }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...rest}>
+    {Array.isArray(d) ? d.map((path,i) => <path key={i} d={path} />) : <path d={d} />}
+  </svg>
+);
+const Icons = {
+  dashboard: ['M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z','M9 22V12h6v10'],
+  car:       ['M5 17H3v-5l2.5-5h11L19 12v5h-2','M7 17h10','M7 17a2 2 0 100-4 2 2 0 000 4z','M17 17a2 2 0 100-4 2 2 0 000 4z'],
+  users:     ['M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2','M9 3a4 4 0 100 8 4 4 0 000-8z','M23 21v-2a4 4 0 00-3-3.87','M16 3.13a4 4 0 010 7.75'],
+  user:      ['M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2','M12 3a4 4 0 100 8 4 4 0 000-8z'],
+  package:   ['M12 2l3.09 6.26L21 9.27l-4.5 4.38 1.06 6.18L12 17l-5.56 2.83 1.06-6.18L3 9.27l5.91-.91L12 2z'],
+  book:      ['M4 19.5A2.5 2.5 0 016.5 17H20','M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z'],
+  money:     ['M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6'],
+  plus:      'M12 5v14M5 12h14',
+  search:    ['M21 21l-4.35-4.35','M17 11A6 6 0 105 11a6 6 0 0012 0z'],
+  close:     'M18 6L6 18M6 6l12 12',
+  chevron:   'M9 18l6-6-6-6',
+  edit:      ['M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7','M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z'],
+  trash:     ['M3 6h18','M8 6V4h8v2','M19 6l-1 14H6L5 6'],
+  check:     'M20 6L9 17l-5-5',
+  alert:     ['M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z','M12 9v4','M12 17h.01'],
+  inventory: ['M22 12H2','M5 12V5a2 2 0 012-2h10a2 2 0 012 2v7','M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7'],
+};
+
+// ─── Reusable Components ──────────────────────────────────────────────────────
+function Modal({ isOpen, onClose, title, subtitle, children, footer }) {
+  if (!isOpen) return null;
+  return (
+    <div className="modal-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+      <div className="modal-box">
+        <div className="modal-header">
+          <div>
+            <div className="modal-title">{title}</div>
+            {subtitle && <div className="modal-sub">{subtitle}</div>}
+          </div>
+          <button className="modal-close" onClick={onClose}><Ic d={Icons.close} size={18}/></button>
+        </div>
+        <div className="modal-body">{children}</div>
+        {footer && <div className="modal-footer">{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, sub, color='#0ea5e9', icon }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-icon" style={{ background: color+'20' }}>
+        <Ic d={icon} size={18} color={color} />
+      </div>
+      <div className="stat-card-label">{label}</div>
+      <div className="stat-card-value">{value}</div>
+      {sub && <div className="stat-card-sub">{sub}</div>}
+    </div>
+  );
+}
+
+function Badge({ status, cat }) {
+  if (status) {
+    const s = STATUS_MAP[status] || { label: status, cls: 'badge-gray' };
+    return <span className={`badge ${s.cls}`}>{s.label}</span>;
+  }
+  if (cat) {
+    const c = CAT_MAP[cat] || { label: cat, cls: 'badge-gray' };
+    return <span className={`badge ${c.cls}`}>{c.label}</span>;
+  }
+  return null;
+}
+
+function SearchInput({ value, onChange, placeholder='Buscar...' }) {
+  return (
+    <div className="search-input">
+      <Ic d={Icons.search} size={15} color="var(--text2)" />
+      <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+    </div>
+  );
+}
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+const NAV = [
+  { id:'dashboard',  label:'Dashboard',         icon:Icons.dashboard },
+  { id:'servicios',  label:'Servicios de Lavado',icon:Icons.car },
+  { id:'clientes',   label:'Clientes',           icon:Icons.users },
+  { id:'empleados',  label:'Empleados',          icon:Icons.user },
+  { id:'inventario', label:'Inventario',         icon:Icons.inventory },
+  { id:'catalogo',   label:'Catálogo de Servicios',icon:Icons.book },
+  { id:'cierre',     label:'Cierre del Día',     icon:Icons.money },
+];
+
+function Sidebar({ screen, onNav }) {
+  return (
+    <div className="sidebar">
+      <div className="sidebar-logo">
+        <h1>🚗 Lavadero</h1>
+        <p>Sistema de Gestión</p>
+      </div>
+      <nav className="sidebar-nav">
+        <div className="sidebar-section-label">Principal</div>
+        {NAV.slice(0,2).map(n => (
+          <div key={n.id} className={`nav-item ${screen===n.id?'active':''}`} onClick={()=>onNav(n.id)}>
+            <Ic d={n.icon} size={16} />{n.label}
+          </div>
+        ))}
+        <div className="sidebar-section-label" style={{marginTop:12}}>Gestión</div>
+        {NAV.slice(2,6).map(n => (
+          <div key={n.id} className={`nav-item ${screen===n.id?'active':''}`} onClick={()=>onNav(n.id)}>
+            <Ic d={n.icon} size={16} />{n.label}
+          </div>
+        ))}
+        <div className="sidebar-section-label" style={{marginTop:12}}>Operaciones</div>
+        {NAV.slice(6).map(n => (
+          <div key={n.id} className={`nav-item ${screen===n.id?'active':''}`} onClick={()=>onNav(n.id)}>
+            <Ic d={n.icon} size={16} />{n.label}
+          </div>
+        ))}
+      </nav>
+      <div className="sidebar-footer">
+        <div className="user-row">
+          <div className="user-avatar">A</div>
+          <div className="user-info">
+            <h3>Admin</h3>
+            <p>Propietario</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCREEN: Dashboard ────────────────────────────────────────────────────────
+function Dashboard({ washings, employees, onNav }) {
+  const today = washings;
+  const completados = today.filter(w => w.status === 'completado');
+  const enProceso = today.filter(w => w.status === 'en_proceso');
+  const ingresos = completados.reduce((s, w) => s + w.price, 0);
+
+  return (
+    <div>
+      <div className="stat-grid">
+        <StatCard label="Servicios Hoy" value={today.length} sub={`${completados.length} completados`} color="#0ea5e9" icon={Icons.car} />
+        <StatCard label="En Proceso" value={enProceso.length} sub="activos ahora" color="#f59e0b" icon={Icons.car} />
+        <StatCard label="Completados" value={completados.length} sub={`${Math.round(completados.length/today.length*100)}% del total`} color="#22c55e" icon={Icons.check} />
+        <StatCard label="Ingresos Hoy" value={fmt(ingresos)} sub="servicios pagados" color="#7c3aed" icon={Icons.money} />
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Servicios del Día</div>
+            <div className="card-sub">27 de Abril, 2026</div>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => onNav('servicios')}>
+            <Ic d={Icons.plus} size={14} /> Nuevo Servicio
+          </button>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Empleado</th><th>Cliente / Placa</th><th>Servicio</th><th>Precio</th><th>Estado</th><th>Hora</th>
+            </tr></thead>
+            <tbody>
+              {washings.map(w => {
+                const emp = getEmployee(w.employeeId, employees);
+                const cli = getClient(w.clientId);
+                return (
+                  <tr key={w.id} onClick={() => onNav('servicios')} style={{cursor:'pointer'}}>
+                    <td>{emp?.name || '—'}</td>
+                    <td>
+                      <div style={{fontWeight:600}}>{cli?.name}</div>
+                      <div style={{fontSize:12,color:'var(--text2)'}}>{w.plate} · {VEHICLE_LABELS[w.vehicleType]}</div>
+                    </td>
+                    <td className="muted">{w.service}</td>
+                    <td style={{fontWeight:600}}>{fmt(w.price)}</td>
+                    <td><Badge status={w.status} /></td>
+                    <td className="muted">{w.time}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:16}}>
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Empleados Activos</div>
+              <div className="card-sub">Comisiones del día</div>
+            </div>
+          </div>
+          <div style={{padding:'4px 0'}}>
+            {employees.filter(e=>e.active).map(emp => {
+              const empWashings = washings.filter(w => w.employeeId === emp.id && w.status === 'completado');
+              const earned = empWashings.reduce((s,w) => s + w.price, 0);
+              const commission = Math.round(earned * emp.commission / 100);
+              const pct = earned > 0 ? Math.min(100, Math.round(earned / 80000 * 100)) : 0;
+              return (
+                <div key={emp.id} style={{padding:'12px 20px',borderBottom:'1px solid var(--border)'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                    <div>
+                      <div style={{fontWeight:600,fontSize:13}}>{emp.name}</div>
+                      <div style={{fontSize:11,color:'var(--text2)'}}>{empWashings.length} servicio{empWashings.length!==1?'s':''} · {emp.commission}% comisión</div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontWeight:700,fontSize:14,color:'var(--success)'}}>{fmt(commission)}</div>
+                      <div style={{fontSize:11,color:'var(--text2)'}}>de {fmt(earned)}</div>
+                    </div>
+                  </div>
+                  <div className="progress-bar-wrap"><div className="progress-bar" style={{width:pct+'%'}}></div></div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Alertas de Inventario</div>
+            <div className="card-sub">Stock bajo</div>
+          </div>
+          <div style={{padding:'4px 0'}}>
+            {INIT_INVENTORY.filter(i => i.stock <= i.minStock).map(item => (
+              <div key={item.id} style={{padding:'11px 20px',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div>
+                  <div style={{fontWeight:600,fontSize:13}}>{item.name}</div>
+                  <div style={{fontSize:11,color:'var(--text2)'}}><Badge cat={item.category} /></div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontWeight:700,fontSize:14,color:'var(--danger)'}}>{item.stock} {item.unit}{item.stock!==1?'s':''}</div>
+                  <div style={{fontSize:11,color:'var(--text2)'}}>mín. {item.minStock}</div>
+                </div>
+              </div>
+            ))}
+            {INIT_INVENTORY.filter(i => i.stock <= i.minStock).length === 0 && (
+              <div className="empty-state">Todo el inventario está bien ✓</div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCREEN: Servicios ────────────────────────────────────────────────────────
+function Servicios({ washings, setWashings, employees }) {
+  const [tab, setTab] = useState('todos');
+  const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ employeeId:'', clientId:'', plate:'', vehicleType:'sedan', service:'', price:'', observations:'' });
+
+  const filtered = washings.filter(w => {
+    const matchTab = tab === 'todos' || w.status === tab;
+    const q = search.toLowerCase();
+    const cli = getClient(w.clientId);
+    const emp = getEmployee(w.employeeId, employees);
+    const matchSearch = !q || w.plate.toLowerCase().includes(q) || cli?.name.toLowerCase().includes(q) || emp?.name.toLowerCase().includes(q) || w.service.toLowerCase().includes(q);
+    return matchTab && matchSearch;
+  });
+
+  const handleCreate = () => {
+    if (!form.employeeId || !form.plate || !form.service || !form.price) return;
+    const newW = { id:'w'+Date.now(), ...form, price:parseInt(form.price), status:'pendiente', time:new Date().toTimeString().slice(0,5), clientId:form.clientId||'c1' };
+    setWashings(prev => [newW, ...prev]);
+    setShowModal(false);
+    setForm({ employeeId:'', clientId:'', plate:'', vehicleType:'sedan', service:'', price:'', observations:'' });
+  };
+
+  const changeStatus = (id, status) => setWashings(prev => prev.map(w => w.id===id ? {...w, status} : w));
+
+  const totalToday = washings.reduce((s,w) => s + (w.status==='completado' ? w.price : 0), 0);
+
+  return (
+    <div>
+      <div className="stat-grid">
+        <StatCard label="Total Hoy" value={washings.length} color="#0ea5e9" icon={Icons.car} />
+        <StatCard label="Completados" value={washings.filter(w=>w.status==='completado').length} color="#22c55e" icon={Icons.check} />
+        <StatCard label="En Proceso" value={washings.filter(w=>w.status==='en_proceso').length} color="#f59e0b" icon={Icons.car} />
+        <StatCard label="Ingresos" value={fmt(totalToday)} color="#7c3aed" icon={Icons.money} />
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Servicios de Lavado</div>
+            <div className="card-sub">Lista de todos los servicios del día</div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn btn-primary" onClick={()=>setShowModal(true)}>
+              <Ic d={Icons.plus} size={15}/> Nuevo Servicio
+            </button>
+          </div>
+        </div>
+        <div style={{padding:'12px 20px',borderBottom:'1px solid var(--border)',display:'flex',gap:12,alignItems:'center',flexWrap:'wrap'}}>
+          <div className="tabs">
+            {['todos','pendiente','en_proceso','completado'].map(t => (
+              <button key={t} className={`tab ${tab===t?'active':''}`} onClick={()=>setTab(t)}>
+                {t==='todos'?'Todos':STATUS_MAP[t]?.label||t}
+              </button>
+            ))}
+          </div>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar servicio, placa..." />
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Empleado</th><th>Cliente / Placa</th><th>Servicio</th><th>Tipo</th><th>Precio</th><th>Estado</th><th>Hora</th><th>Acciones</th>
+            </tr></thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr><td colSpan={8} style={{textAlign:'center',padding:'32px',color:'var(--text2)'}}>No hay servicios</td></tr>
+              )}
+              {filtered.map(w => {
+                const emp = getEmployee(w.employeeId, employees);
+                const cli = getClient(w.clientId);
+                return (
+                  <tr key={w.id}>
+                    <td style={{fontWeight:500}}>{emp?.name||'—'}</td>
+                    <td>
+                      <div style={{fontWeight:600}}>{cli?.name||'—'}</div>
+                      <div style={{fontSize:12,color:'var(--text2)'}}>{w.plate}</div>
+                    </td>
+                    <td className="muted">{w.service}</td>
+                    <td><span className="chip">{VEHICLE_LABELS[w.vehicleType]}</span></td>
+                    <td style={{fontWeight:700}}>{fmt(w.price)}</td>
+                    <td><Badge status={w.status} /></td>
+                    <td className="muted">{w.time}</td>
+                    <td>
+                      <select style={{fontSize:12,background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 8px',color:'var(--text)',fontFamily:'DM Sans,sans-serif',cursor:'pointer'}}
+                        value={w.status} onChange={e=>changeStatus(w.id, e.target.value)}>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_proceso">En Proceso</option>
+                        <option value="completado">Completado</option>
+                      </select>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal isOpen={showModal} onClose={()=>setShowModal(false)} title="Nuevo Servicio de Lavado" subtitle="Registra un nuevo servicio"
+        footer={<>
+          <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleCreate}>Crear Servicio</button>
+        </>}>
+        <div className="form-grid">
+          <div className="field">
+            <label>Empleado</label>
+            <select value={form.employeeId} onChange={e=>setForm({...form,employeeId:e.target.value})}>
+              <option value="">Seleccionar...</option>
+              {employees.filter(e=>e.active).map(e=><option key={e.id} value={e.id}>{e.name}</option>)}
+            </select>
+          </div>
+          <div className="field">
+            <label>Cliente</label>
+            <select value={form.clientId} onChange={e=>{
+              const cli = CLIENTS.find(c=>c.id===e.target.value);
+              setForm({...form, clientId:e.target.value, plate: cli?.vehicles[0]?.plate||''});
+            }}>
+              <option value="">Seleccionar...</option>
+              {CLIENTS.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="field">
+            <label>Placa</label>
+            <input value={form.plate} onChange={e=>setForm({...form,plate:e.target.value})} placeholder="Ej: ABC-123" />
+          </div>
+          <div className="field">
+            <label>Tipo de Vehículo</label>
+            <select value={form.vehicleType} onChange={e=>setForm({...form,vehicleType:e.target.value})}>
+              {VEHICLE_TYPES.map(t=><option key={t} value={t}>{VEHICLE_LABELS[t]}</option>)}
+            </select>
+          </div>
+          <div className="field span-2">
+            <label>Servicio</label>
+            <select value={form.service} onChange={e=>{
+              const svc = SERVICE_TYPES.find(s=>s.name===e.target.value);
+              const price = svc ? svc[form.vehicleType] || '' : '';
+              setForm({...form, service:e.target.value, price: price.toString()});
+            }}>
+              <option value="">Seleccionar servicio...</option>
+              {SERVICE_TYPES.map(s=><option key={s.id} value={s.name}>{s.name} — {fmt(s[form.vehicleType]||0)}</option>)}
+            </select>
+          </div>
+          <div className="field">
+            <label>Precio Final</label>
+            <input type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0" />
+          </div>
+          <div className="field">
+            <label>Hora</label>
+            <input type="time" defaultValue={new Date().toTimeString().slice(0,5)} />
+          </div>
+          <div className="field span-2">
+            <label>Observaciones</label>
+            <textarea value={form.observations} onChange={e=>setForm({...form,observations:e.target.value})} placeholder="Notas adicionales..." />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── SCREEN: Empleados ────────────────────────────────────────────────────────
+function Empleados({ employees, setEmployees, washings }) {
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name:'', phone:'', commission:30 });
+
+  const handleCreate = () => {
+    if (!form.name) return;
+    setEmployees(prev => [...prev, { id:'e'+Date.now(), ...form, commission:parseInt(form.commission), active:true }]);
+    setShowModal(false);
+    setForm({ name:'', phone:'', commission:30 });
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Empleados</div>
+            <div className="card-sub">Gestión de empleados y comisiones</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>setShowModal(true)}>
+            <Ic d={Icons.plus} size={15}/> Nuevo Empleado
+          </button>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Empleado</th><th>Teléfono</th><th>Comisión</th><th>Servicios Hoy</th><th>Ganado Hoy</th><th>A Pagar</th><th>Estado</th>
+            </tr></thead>
+            <tbody>
+              {employees.map(emp => {
+                const empW = washings.filter(w => w.employeeId===emp.id && w.status==='completado');
+                const earned = empW.reduce((s,w)=>s+w.price, 0);
+                const toPay = Math.round(earned * emp.commission / 100);
+                return (
+                  <tr key={emp.id}>
+                    <td>
+                      <div style={{display:'flex',alignItems:'center',gap:10}}>
+                        <div style={{width:32,height:32,borderRadius:'50%',background:'var(--primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'#fff',flexShrink:0}}>
+                          {emp.name.charAt(0)}
+                        </div>
+                        <span style={{fontWeight:600}}>{emp.name}</span>
+                      </div>
+                    </td>
+                    <td className="muted">{emp.phone}</td>
+                    <td><span style={{fontWeight:700,color:'var(--accent)'}}>{emp.commission}%</span></td>
+                    <td style={{fontWeight:600}}>{empW.length}</td>
+                    <td style={{fontWeight:600}}>{fmt(earned)}</td>
+                    <td style={{fontWeight:700,color:'var(--success)'}}>{fmt(toPay)}</td>
+                    <td>
+                      <span className={`badge ${emp.active?'badge-green':'badge-gray'}`}>
+                        {emp.active ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal isOpen={showModal} onClose={()=>setShowModal(false)} title="Nuevo Empleado" subtitle="Registra un empleado"
+        footer={<>
+          <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleCreate}>Crear Empleado</button>
+        </>}>
+        <div className="form-grid">
+          <div className="field span-2"><label>Nombre completo</label>
+            <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Nombre del empleado" />
+          </div>
+          <div className="field"><label>Teléfono</label>
+            <input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="300-000-0000" />
+          </div>
+          <div className="field"><label>Comisión (%)</label>
+            <input type="number" min="0" max="100" value={form.commission} onChange={e=>setForm({...form,commission:e.target.value})} />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── SCREEN: Inventario ───────────────────────────────────────────────────────
+function Inventario({ inventory, setInventory }) {
+  const [cat, setCat] = useState('todos');
+  const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name:'', category:'limpieza', stock:'', price:'', unit:'unidad', minStock:'5' });
+
+  const filtered = inventory.filter(i => {
+    const matchCat = cat==='todos' || i.category===cat;
+    const matchSearch = !search || i.name.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  const handleCreate = () => {
+    if (!form.name || !form.stock || !form.price) return;
+    setInventory(prev => [...prev, { id:'i'+Date.now(), ...form, stock:parseInt(form.stock), price:parseInt(form.price), minStock:parseInt(form.minStock) }]);
+    setShowModal(false);
+    setForm({ name:'', category:'limpieza', stock:'', price:'', unit:'unidad', minStock:'5' });
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Inventario de Productos</div>
+            <div className="card-sub">{inventory.length} productos registrados</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>setShowModal(true)}>
+            <Ic d={Icons.plus} size={15}/> Agregar Producto
+          </button>
+        </div>
+        <div style={{padding:'12px 20px',borderBottom:'1px solid var(--border)',display:'flex',gap:12,alignItems:'center',flexWrap:'wrap'}}>
+          <div className="tabs">
+            {['todos','limpieza','bateria','perfumeria'].map(c => (
+              <button key={c} className={`tab ${cat===c?'active':''}`} onClick={()=>setCat(c)}>
+                {c==='todos'?'Todos':CAT_MAP[c]?.label||c}
+              </button>
+            ))}
+          </div>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar producto..." />
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio Unitario</th><th>Estado</th>
+            </tr></thead>
+            <tbody>
+              {filtered.map(item => {
+                const low = item.stock <= item.minStock;
+                return (
+                  <tr key={item.id}>
+                    <td style={{fontWeight:600}}>{item.name}</td>
+                    <td><Badge cat={item.category} /></td>
+                    <td>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}>
+                        <span style={{fontWeight:700,color: low ? 'var(--danger)' : 'var(--text)'}}>{item.stock}</span>
+                        <span style={{fontSize:12,color:'var(--text2)'}}>{item.unit}{item.stock!==1?'s':''}</span>
+                      </div>
+                    </td>
+                    <td style={{fontWeight:600}}>{fmt(item.price)}</td>
+                    <td>
+                      {low
+                        ? <span className="badge badge-red"><Ic d={Icons.alert} size={11} /> Stock bajo</span>
+                        : <span className="badge badge-green">Normal</span>
+                      }
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal isOpen={showModal} onClose={()=>setShowModal(false)} title="Agregar Producto" subtitle="Registra un nuevo producto"
+        footer={<>
+          <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleCreate}>Agregar</button>
+        </>}>
+        <div className="form-grid">
+          <div className="field span-2"><label>Nombre del Producto</label>
+            <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ej: Shampoo para auto" />
+          </div>
+          <div className="field"><label>Categoría</label>
+            <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})}>
+              <option value="limpieza">Limpieza</option>
+              <option value="bateria">Baterías</option>
+              <option value="perfumeria">Perfumería</option>
+            </select>
+          </div>
+          <div className="field"><label>Unidad</label>
+            <select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}>
+              <option>unidad</option><option>litro</option><option>paquete</option><option>caja</option>
+            </select>
+          </div>
+          <div className="field"><label>Stock inicial</label>
+            <input type="number" value={form.stock} onChange={e=>setForm({...form,stock:e.target.value})} placeholder="0" />
+          </div>
+          <div className="field"><label>Stock mínimo</label>
+            <input type="number" value={form.minStock} onChange={e=>setForm({...form,minStock:e.target.value})} />
+          </div>
+          <div className="field span-2"><label>Precio de Venta</label>
+            <input type="number" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0" />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── SCREEN: Clientes ─────────────────────────────────────────────────────────
+function Clientes() {
+  const [clients, setClients] = useState(CLIENTS);
+  const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name:'', doc:'', phone:'', plate:'', vehicleType:'sedan', brand:'' });
+
+  const filtered = clients.filter(c =>
+    !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.doc.includes(search) || c.phone.includes(search)
+  );
+
+  const handleCreate = () => {
+    if (!form.name) return;
+    const newC = { id:'c'+Date.now(), name:form.name, doc:form.doc, phone:form.phone,
+      vehicles: form.plate ? [{plate:form.plate, type:form.vehicleType, brand:form.brand}] : [] };
+    setClients(prev => [...prev, newC]);
+    setShowModal(false);
+    setForm({ name:'', doc:'', phone:'', plate:'', vehicleType:'sedan', brand:'' });
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Clientes</div>
+            <div className="card-sub">{clients.length} clientes registrados</div>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <SearchInput value={search} onChange={setSearch} placeholder="Buscar cliente..." />
+            <button className="btn btn-primary" onClick={()=>setShowModal(true)}>
+              <Ic d={Icons.plus} size={15}/> Nuevo Cliente
+            </button>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Cliente</th><th>Documento</th><th>Teléfono</th><th>Vehículos</th>
+            </tr></thead>
+            <tbody>
+              {filtered.map(c => (
+                <tr key={c.id}>
+                  <td>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:'var(--accent)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'#fff',flexShrink:0}}>
+                        {c.name.charAt(0)}
+                      </div>
+                      <span style={{fontWeight:600}}>{c.name}</span>
+                    </div>
+                  </td>
+                  <td className="muted">{c.doc}</td>
+                  <td className="muted">{c.phone}</td>
+                  <td>
+                    <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                      {c.vehicles.map((v,i) => (
+                        <div key={i} style={{fontSize:12}}>
+                          <span style={{fontWeight:600}}>{v.plate}</span>
+                          <span style={{color:'var(--text2)',marginLeft:4}}>{v.brand} · {VEHICLE_LABELS[v.type]}</span>
+                        </div>
+                      ))}
+                      {c.vehicles.length===0 && <span style={{color:'var(--text2)',fontSize:12}}>Sin vehículos</span>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal isOpen={showModal} onClose={()=>setShowModal(false)} title="Nuevo Cliente" subtitle="Registra un nuevo cliente"
+        footer={<>
+          <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleCreate}>Crear Cliente</button>
+        </>}>
+        <div className="form-grid">
+          <div className="field span-2"><label>Nombre completo</label>
+            <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Nombre del cliente" />
+          </div>
+          <div className="field"><label>Documento</label>
+            <input value={form.doc} onChange={e=>setForm({...form,doc:e.target.value})} placeholder="CC / NIT" />
+          </div>
+          <div className="field"><label>Teléfono</label>
+            <input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="300-000-0000" />
+          </div>
+          <div style={{gridColumn:'span 2',borderTop:'1px solid var(--border)',paddingTop:14,fontSize:13,fontWeight:600,color:'var(--text2)'}}>Vehículo (opcional)</div>
+          <div className="field"><label>Placa</label>
+            <input value={form.plate} onChange={e=>setForm({...form,plate:e.target.value})} placeholder="ABC-123" />
+          </div>
+          <div className="field"><label>Tipo</label>
+            <select value={form.vehicleType} onChange={e=>setForm({...form,vehicleType:e.target.value})}>
+              {VEHICLE_TYPES.map(t=><option key={t} value={t}>{VEHICLE_LABELS[t]}</option>)}
+            </select>
+          </div>
+          <div className="field span-2"><label>Marca / Modelo</label>
+            <input value={form.brand} onChange={e=>setForm({...form,brand:e.target.value})} placeholder="Ej: Toyota Corolla" />
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── SCREEN: Catálogo ─────────────────────────────────────────────────────────
+function Catalogo() {
+  const [services, setServices] = useState(SERVICE_TYPES);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name:'', sedan:'', suv:'', moto:'', camioneta:'' });
+
+  const updatePrice = (id, vehicleType, value) => {
+    setServices(prev => prev.map(s => s.id===id ? {...s, [vehicleType]: parseInt(value)||0} : s));
+  };
+
+  const handleCreate = () => {
+    if (!form.name) return;
+    setServices(prev => [...prev, { id:'s'+Date.now(), ...form, sedan:parseInt(form.sedan)||0, suv:parseInt(form.suv)||0, moto:parseInt(form.moto)||0, camioneta:parseInt(form.camioneta)||0 }]);
+    setShowModal(false);
+    setForm({ name:'', sedan:'', suv:'', moto:'', camioneta:'' });
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-header">
+          <div>
+            <div className="card-title">Catálogo de Servicios</div>
+            <div className="card-sub">Precios por tipo de vehículo — edita directamente en la tabla</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>setShowModal(true)}>
+            <Ic d={Icons.plus} size={15}/> Nuevo Servicio
+          </button>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Servicio</th>
+              {VEHICLE_TYPES.map(t=><th key={t}>{VEHICLE_LABELS[t]}</th>)}
+            </tr></thead>
+            <tbody>
+              {services.map(svc => (
+                <tr key={svc.id}>
+                  <td style={{fontWeight:600}}>{svc.name}</td>
+                  {VEHICLE_TYPES.map(t => (
+                    <td key={t}>
+                      <div style={{display:'flex',alignItems:'center',gap:4}}>
+                        <span style={{color:'var(--text2)',fontSize:13}}>$</span>
+                        <input className="inline-edit" type="number"
+                          value={svc[t]||0}
+                          onChange={e => updatePrice(svc.id, t, e.target.value)}
+                          style={{width:90}} />
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{padding:'12px 20px',fontSize:12,color:'var(--text2)',borderTop:'1px solid var(--border)'}}>
+          Haz clic en cualquier precio para editarlo directamente. Los cambios se guardan al presionar Enter o hacer clic fuera.
+        </div>
+      </div>
+
+      <Modal isOpen={showModal} onClose={()=>setShowModal(false)} title="Nuevo Servicio" subtitle="Agrega un servicio al catálogo"
+        footer={<>
+          <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancelar</button>
+          <button className="btn btn-primary" onClick={handleCreate}>Crear Servicio</button>
+        </>}>
+        <div className="form-grid">
+          <div className="field span-2"><label>Nombre del Servicio</label>
+            <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Ej: Lavado Exterior" />
+          </div>
+          {VEHICLE_TYPES.map(t => (
+            <div key={t} className="field"><label>Precio {VEHICLE_LABELS[t]}</label>
+              <input type="number" value={form[t]} onChange={e=>setForm({...form,[t]:e.target.value})} placeholder="0" />
+            </div>
+          ))}
+        </div>
+      </Modal>
+    </div>
+  );
+}
+
+// ─── SCREEN: Cierre del Día ───────────────────────────────────────────────────
+function Cierre({ washings, employees }) {
+  const [closed, setClosed] = useState(false);
+  const completados = washings.filter(w => w.status === 'completado');
+  const totalIngresos = completados.reduce((s,w) => s+w.price, 0);
+  const commissionPct = employees[0]?.commission || 30;
+  const totalComisiones = Math.round(totalIngresos * commissionPct / 100);
+  const neto = totalIngresos - totalComisiones;
+
+  const empSummary = employees.filter(e=>e.active).map(emp => {
+    const empW = completados.filter(w => w.employeeId===emp.id);
+    const earned = empW.reduce((s,w)=>s+w.price,0);
+    const toPay = Math.round(earned * emp.commission / 100);
+    return { ...emp, services:empW.length, earned, toPay };
+  }).filter(e => e.services > 0);
+
+  return (
+    <div>
+      {closed ? (
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'80px 20px',textAlign:'center'}}>
+          <div style={{width:64,height:64,borderRadius:'50%',background:'rgba(34,197,94,.15)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:16}}>
+            <Ic d={Icons.check} size={32} color="var(--success)" />
+          </div>
+          <h2 style={{fontSize:22,fontWeight:700,color:'var(--text)',marginBottom:8}}>Día Cerrado</h2>
+          <p style={{color:'var(--text2)',fontSize:14}}>El cierre del 27 de Abril fue registrado exitosamente.</p>
+          <button className="btn btn-ghost" style={{marginTop:20}} onClick={()=>setClosed(false)}>Ver Resumen</button>
+        </div>
+      ) : (
+        <div>
+          <div className="stat-grid">
+            <StatCard label="Total Servicios" value={completados.length} color="#0ea5e9" icon={Icons.car} sub="completados hoy" />
+            <StatCard label="Ingresos Brutos" value={fmt(totalIngresos)} color="#22c55e" icon={Icons.money} />
+            <StatCard label="Total Comisiones" value={fmt(totalComisiones)} color="#f59e0b" icon={Icons.users} sub={`${commissionPct}% por servicio`} />
+            <StatCard label="Ingreso Neto" value={fmt(neto)} color="#7c3aed" icon={Icons.money} sub="descontadas comisiones" />
+          </div>
+
+          <div className="card section-gap">
+            <div className="card-header">
+              <div>
+                <div className="card-title">Pago a Empleados</div>
+                <div className="card-sub">Resumen de comisiones del día — 27 Abril 2026</div>
+              </div>
+            </div>
+            <div className="table-wrap">
+              <table>
+                <thead><tr>
+                  <th>Empleado</th><th>Servicios</th><th>Total Facturado</th><th>Comisión</th><th>A Pagar</th>
+                </tr></thead>
+                <tbody>
+                  {empSummary.length === 0 && (
+                    <tr><td colSpan={5} style={{textAlign:'center',padding:'32px',color:'var(--text2)'}}>No hay servicios completados</td></tr>
+                  )}
+                  {empSummary.map(emp => (
+                    <tr key={emp.id}>
+                      <td>
+                        <div style={{display:'flex',alignItems:'center',gap:10}}>
+                          <div style={{width:32,height:32,borderRadius:'50%',background:'var(--primary)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:'#fff'}}>
+                            {emp.name.charAt(0)}
+                          </div>
+                          <span style={{fontWeight:600}}>{emp.name}</span>
+                        </div>
+                      </td>
+                      <td style={{fontWeight:600}}>{emp.services}</td>
+                      <td>{fmt(emp.earned)}</td>
+                      <td><span style={{fontWeight:600,color:'var(--accent)'}}>{emp.commission}%</span></td>
+                      <td>
+                        <span style={{fontWeight:700,fontSize:16,color:'var(--success)'}}>{fmt(emp.toPay)}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{padding:'20px',borderTop:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+              <div>
+                <div style={{fontSize:13,color:'var(--text2)'}}>Total a pagar a empleados</div>
+                <div style={{fontSize:22,fontWeight:700,color:'var(--text)'}}>{fmt(totalComisiones)}</div>
+              </div>
+              <button className="btn btn-primary" style={{padding:'12px 28px',fontSize:14}} onClick={()=>setClosed(true)}>
+                Confirmar Cierre del Día
+              </button>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header"><div className="card-title">Detalle de Servicios Completados</div></div>
+            <div className="table-wrap">
+              <table>
+                <thead><tr>
+                  <th>Empleado</th><th>Placa</th><th>Servicio</th><th>Precio</th><th>Hora</th>
+                </tr></thead>
+                <tbody>
+                  {completados.map(w => {
+                    const emp = getEmployee(w.employeeId, employees);
+                    return (
+                      <tr key={w.id}>
+                        <td style={{fontWeight:500}}>{emp?.name}</td>
+                        <td style={{fontWeight:600}}>{w.plate}</td>
+                        <td className="muted">{w.service}</td>
+                        <td style={{fontWeight:700}}>{fmt(w.price)}</td>
+                        <td className="muted">{w.time}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "azul",
+  "commissionPct": 40,
+  "sidebarWidth": 260
+}/*EDITMODE-END*/;
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [screen, setScreen] = useState('dashboard');
+  const [washings, setWashings] = useState(INIT_WASHINGS);
+  const [employees, setEmployees] = useState(EMPLOYEES);
+  const [inventory, setInventory] = useState(INIT_INVENTORY);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', tweaks.theme === 'azul' ? '' : tweaks.theme);
+    setEmployees(prev => prev.map(e => ({ ...e, commission: tweaks.commissionPct })));
+  }, [tweaks.theme, tweaks.commissionPct]);
+
+  const SCREEN_TITLES = {
+    dashboard:  ['Principal', 'Dashboard'],
+    servicios:  ['Lavados', 'Servicios de Lavado'],
+    empleados:  ['Gestión', 'Empleados'],
+    inventario: ['Gestión', 'Inventario'],
+    clientes:   ['Gestión', 'Clientes y Vehículos'],
+    catalogo:   ['Gestión', 'Catálogo de Servicios'],
+    cierre:     ['Operaciones', 'Cierre del Día'],
+  };
+  const [section, title] = SCREEN_TITLES[screen] || ['', screen];
+
+  return (
+    <div className="app">
+      <Sidebar screen={screen} onNav={setScreen} />
+      <div className="main">
+        <div className="topbar">
+          <div className="topbar-left">
+            <div className="topbar-breadcrumb">{section}</div>
+            <div className="topbar-title">{title}</div>
+          </div>
+          <div className="topbar-actions">
+            <div style={{fontSize:12,color:'var(--text2)'}}>Lun 27 Abr 2026</div>
+          </div>
+        </div>
+        <div className="content">
+          {screen === 'dashboard'  && <Dashboard washings={washings} employees={employees} onNav={setScreen} />}
+          {screen === 'servicios'  && <Servicios washings={washings} setWashings={setWashings} employees={employees} />}
+          {screen === 'empleados'  && <Empleados employees={employees} setEmployees={setEmployees} washings={washings} />}
+          {screen === 'inventario' && <Inventario inventory={inventory} setInventory={setInventory} />}
+          {screen === 'clientes'   && <Clientes />}
+          {screen === 'catalogo'   && <Catalogo />}
+          {screen === 'cierre'     && <Cierre washings={washings} employees={employees} />}
+        </div>
+      </div>
+
+      <TweaksPanel>
+        <TweakRadio label="Tema visual"
+          value={tweaks.theme}
+          options={['azul','esmeralda','graphite']}
+          onChange={v => setTweak('theme', v)} />
+        <TweakSlider label="Comisión empleados (%)"
+          value={tweaks.commissionPct} min={10} max={50} step={5}
+          onChange={v => setTweak('commissionPct', v)} />
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
